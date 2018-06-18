@@ -7,9 +7,7 @@
 <hr>
 
 <div class="paginator">
-    {% for p in pages %}
-        <div>{% if p == cur_page %}{{p.0}}{% else %}{{p.1|safe}}{% endif %}</div>
-    {% endfor %}
+    {% for p in pages %}<div>{{p|safe}}</div>{% endfor %}
 </div>
 
 <form method="get">

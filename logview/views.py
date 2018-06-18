@@ -3,10 +3,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 from .models import *
 
 
+@login_required
 def index_view(request):
 
     ctx = {
@@ -18,7 +21,7 @@ def index_view(request):
     return render(request, "logview/index.html", ctx)
 
 
-
+@login_required
 def log_view(request):
 
     FIELDS = ("file", "date", "user", "task", "text")
@@ -50,7 +53,11 @@ def log_view(request):
         value = request.GET.get(name, "")
         headers.append({
             "name": name,
-            "widget": """<input type="text" name="%s" value="%s">""" % (name, value)
+            "widget": """<input type="text" name="%s" value="%s" class="table-filter" 
+                                data-ac-url="%s" data-ac-field="%s">""" % (
+                name, value,
+                reverse("logview:autocomplete"), name,
+            )
         })
 
     def _url(page):
@@ -62,15 +69,32 @@ def log_view(request):
         return url
 
     ctx = {
-        "page_title": _("logs"),
+        "page_title": _("Logs"),
         "logs": qset,
         "num_logs": num_logs,
         "num_logs_percent": round(num_logs / max(1, num_logs_all) * 100, 2),
         "headers": headers,
-        "pages": [(p, """<a href="%s">%s</a>""" % (_url(p), p))
+        "pages": [("""<a href="%s">%s</a>""" % (_url(p), p)) if p!=cur_page else p
                   for p in range(num_pages)],
         "cur_page": cur_page,
+        "js": ("logview/autocomplete.js",),
     }
 
     return render(request, "logview/log.html", ctx)
 
+
+@login_required
+def autocomplete(request):
+    field = request.GET.get("n")
+    query = request.GET.get("q")
+    if not field or not query:
+        return JsonResponse({"items":[]})
+
+    filters = {
+        "%s__icontains" % field: query,
+    }
+    qset = LogFileEntry.objects.filter(**filters)
+    results = qset.order_by(field).values_list(field).distinct()[:30]
+    results = list(r[0] for r in results)
+
+    return JsonResponse({"items":results})
