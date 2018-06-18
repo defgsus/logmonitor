@@ -3,7 +3,7 @@ import gzip
 import datetime
 
 
-def load_logfiles(filename):
+def load_logfiles(filename, after_date=None):
     path = os.path.dirname(filename)
     name = filename.split("/")[-1]
     filenames = []
@@ -17,9 +17,15 @@ def load_logfiles(filename):
     all_data = []
     for fn in filenames:
         data = load_logfile(fn)
-        all_data += data
-    print(all_data)
-    print(len(all_data))
+        if after_date is None:
+            all_data += data
+        else:
+            for d in data:
+                if d["date"] > after_date:
+                    all_data.append(d)
+                else:
+                    return all_data
+    return all_data
 
 
 def load_logfile(filename):
@@ -60,4 +66,8 @@ def _load_logfile(fp, year):
 
 if __name__ == "__main__":
 
-    load_logfiles("/var/log/syslog")
+    after_date = datetime.datetime(2018, 6, 18, 10, 11, 58)
+
+    data = load_logfiles("/var/log/syslog", after_date=after_date)
+    print(data)
+    print(len(data))

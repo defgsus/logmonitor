@@ -2,13 +2,38 @@
 
 {% block content %}
 
-<h3>{{log_name}}</h3>
+<small>{{num_logs}} entries ({{num_logs_percent}}%)</small>
+
 <hr>
 
-<table>
-    {% for log in logs %}
-        <tr></tr>
-    {% endfor %}
-</table>
+<form method="get">
+    <input type="submit" hidden="hidden">
+
+    <table class="log-table">
+        <thead>
+            <tr>
+                {% for head in headers %}
+                    <td>{{ head.name }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for head in headers %}
+                    <td>{{ head.widget|safe }}</td>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in logs %}
+            <tr>
+                <td>{{log.file}}</td>
+                <td>{{log.date.isoformat}}</td>
+                <td>{{log.user}}</td>
+                <td>{{log.task}}</td>
+                <td>{{log.text}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</form>
 
 {% endblock %}
