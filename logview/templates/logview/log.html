@@ -1,0 +1,14 @@
+{% extends 'logview/base.html' %}
+
+{% block content %}
+
+<h3>{{log_name}}</h3>
+<hr>
+
+<table>
+    {% for log in logs %}
+        <tr></tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
