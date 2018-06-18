@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.conf import settings
 
 from .models import *
@@ -21,6 +22,7 @@ def index_view(request):
 def log_view(request):
 
     FIELDS = ("file", "date", "user", "task", "text")
+    NUM_PER_PAGE = 100
 
     filters = dict()
     for name in FIELDS:
@@ -34,7 +36,14 @@ def log_view(request):
     qset = qset.order_by("-date")
 
     num_logs = qset.count()
-    qset = qset[0:50]
+
+    try:
+        cur_page = int(request.GET.get("p", 0))
+    except (TypeError, ValueError):
+        cur_page = 0
+    qset = qset[cur_page*NUM_PER_PAGE:(cur_page+1)*NUM_PER_PAGE]
+
+    num_pages = num_logs // NUM_PER_PAGE
 
     headers = []
     for name in FIELDS:
@@ -44,12 +53,23 @@ def log_view(request):
             "widget": """<input type="text" name="%s" value="%s">""" % (name, value)
         })
 
+    def _url(page):
+        f = filters.copy()
+        f["p"] = page
+        url = urlencode(f)
+        if not filters:
+            url = "?" + url
+        return url
+
     ctx = {
         "page_title": _("logs"),
         "logs": qset,
         "num_logs": num_logs,
         "num_logs_percent": round(num_logs / max(1, num_logs_all) * 100, 2),
         "headers": headers,
+        "pages": [(p, """<a href="%s">%s</a>""" % (_url(p), p))
+                  for p in range(num_pages)],
+        "cur_page": cur_page,
     }
 
     return render(request, "logview/log.html", ctx)

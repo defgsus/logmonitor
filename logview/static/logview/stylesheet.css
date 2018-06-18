@@ -2,8 +2,21 @@
 
 }
 
-
 .log-table td {
     padding-left: 7px;
     padding-right: 7px;
+}
+
+.log-table tr:hover {
+    background: #eee;
+}
+
+.paginator {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.paginator>div {
+    margin-right: 5px;
 }
