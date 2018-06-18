@@ -14,6 +14,10 @@ def load_logfiles(filename, after_date=None):
                     filenames.append(os.path.join(root, f))
     filenames.sort()
 
+    if not filenames:
+        print("not-found", filename)
+        return []
+
     all_data = []
     for fn in filenames:
         data = load_logfile(fn)
@@ -29,30 +33,70 @@ def load_logfiles(filename, after_date=None):
 
 
 def load_logfile(filename):
-    dt = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-    if filename.endswith(".gz"):
-        with gzip.open(filename, "rt") as fp:
-            return _load_logfile(fp, dt.year)
-    else:
-        with open(filename, "rt") as fp:
-            return _load_logfile(fp, dt.year)
-
+    print("parse", filename)
+    try:
+        dt = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+        if filename.endswith(".gz"):
+            with gzip.open(filename, "rb") as fp:
+                return _load_logfile(fp, dt.year)
+        else:
+            with open(filename, "rb") as fp:
+                return _load_logfile(fp, dt.year)
+    except PermissionError as e:
+        print("permission-error", filename, e)
+        return []
+    except UnicodeDecodeError as e:
+        print("unicode-error", filename, e)
+        raise e
+    except ValueError as e:
+        print("value-error", filename, e)
+        raise e
 
 def _load_logfile(fp, year):
     ret = []
-    lines = fp.read().split("\n")
+    lines = fp.read()
+    lines = lines.decode("utf-8").split("\n")
+
+    num_no_date = 0
+
     for line in lines:
         #print(line)
         if not line:
             continue
-        if line[4] == " ":
-            line = line[:4] + "0" + line[5:]
-        dt = datetime.datetime.strptime(line[:15], "%b %d %H:%M:%S")
-        dt = dt.replace(year=year)
 
-        line = line[15:].split(":")
-        user, task = line[0].strip().split(" ")
-        text = ":".join(line[1:]).strip()
+        if line.startswith("update-alternatives"):
+            user = ""
+            task = line[:20]
+            line = line[20:]
+            dt = datetime.datetime.strptime(line[:19], "%Y-%m-%d %H:%M:%S")
+            text = line[20:].strip()
+        else:
+            if len(line) > 10:
+                if line[4] == " ":
+                    line = line[:4] + "0" + line[5:]
+
+            try:
+                dt = datetime.datetime.strptime(line[:15], "%b %d %H:%M:%S")
+                date_len = 15
+            except ValueError as e:
+                try:
+                    dt = datetime.datetime.strptime(line[:19], "%Y-%m-%d %H:%M:%S")
+                    date_len = 19
+                except ValueError as e:
+                    num_no_date += 1
+                    continue
+            dt = dt.replace(year=year)
+
+            line = line[date_len:]
+            try:
+                sline = line.split(":")
+                user, task = sline[0].strip().split(" ")
+                text = ":".join(sline[1:]).strip()
+            except ValueError:
+                user = ""
+                sline = line.split(" ")
+                task = sline[0]
+                text = " ".join(sline[1:])
 
         ret.append({
             "date": dt,
@@ -61,6 +105,9 @@ def _load_logfile(fp, year):
             "text": text
         })
         #print(dt, user, task, text)
+
+    if num_no_date:
+        print("parse-error", "%s without date" % num_no_date)
     return ret
 
 

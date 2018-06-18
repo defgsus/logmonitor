@@ -123,7 +123,18 @@ STATIC_URL = '/static/'
 
 
 LOG_FILES = {
+    "alternatives": "/var/log/alternatives",
+    "apport": "/var/log/apport",
+    "auth": "/var/log/auth",
+    "btmp": "/var/log/btmp",
+    "dpkg": "/var/log/dpkg",
+    "kern": "/var/log/kern",
+    "pm-powersave": "/var/log/pm-powersave",
+    "pm-suspend": "/var/log/pm-suspend",
     "syslog": "/var/log/syslog",
+
+    "nginx/access": "/var/log/nginx/access",
+    "nginx/error": "/var/log/nginx/error",
 }
 
 
