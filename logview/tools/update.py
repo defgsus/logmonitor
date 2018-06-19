@@ -18,7 +18,7 @@ def update_log_entries(file_id):
     if qset.exists():
         after_date = qset[0].date
 
-    data = load_logfiles(filename, after_date=after_date)
+    data = load_logfiles(filename, file_id, after_date=after_date)
 
     with transaction.atomic():
         for e in data:

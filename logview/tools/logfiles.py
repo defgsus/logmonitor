@@ -3,7 +3,7 @@ import gzip
 import datetime
 
 
-def load_logfiles(filename, after_date=None):
+def load_logfiles(filename, file_id, after_date=None):
     path = os.path.dirname(filename)
     name = filename.split("/")[-1]
     filenames = []
@@ -20,7 +20,7 @@ def load_logfiles(filename, after_date=None):
 
     all_data = []
     for fn in filenames:
-        data = load_logfile(fn)
+        data = load_logfile(fn, file_id)
         if after_date is None:
             all_data += data
         else:
@@ -32,16 +32,16 @@ def load_logfiles(filename, after_date=None):
     return all_data
 
 
-def load_logfile(filename):
+def load_logfile(filename, file_id):
     print("parse", filename)
     try:
         dt = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         if filename.endswith(".gz"):
             with gzip.open(filename, "rb") as fp:
-                return _load_logfile(fp, dt.year)
+                return _load_logfile(fp, file_id, dt.year)
         else:
             with open(filename, "rb") as fp:
-                return _load_logfile(fp, dt.year)
+                return _load_logfile(fp, file_id, dt.year)
     except PermissionError as e:
         print("permission-error", filename, e)
         return []
@@ -52,7 +52,8 @@ def load_logfile(filename):
         print("value-error", filename, e)
         raise e
 
-def _load_logfile(fp, year):
+
+def _load_logfile(fp, file_id, year):
     ret = []
     lines = fp.read()
     lines = lines.decode("utf-8").split("\n")
@@ -64,7 +65,14 @@ def _load_logfile(fp, year):
         if not line:
             continue
 
-        if line.startswith("update-alternatives"):
+        if file_id == "dpkg":
+            user = ""
+            dt = datetime.datetime.strptime(line[:19], "%Y-%m-%d %H:%M:%S")
+            line = line[20:].strip()
+            sline = line.split()
+            task = sline[0]
+            text = " ".join(sline[1:])
+        elif line.startswith("update-alternatives"):
             user = ""
             task = line[:20]
             line = line[20:]

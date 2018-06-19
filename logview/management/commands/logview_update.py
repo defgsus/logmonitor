@@ -9,8 +9,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         starttime = datetime.datetime.now()
+
         from logview.tools.update import update_all_log_entries
         update_all_log_entries()
+
         endtime = datetime.datetime.now()
 
         print("TOOK %s" % (endtime - starttime))
