@@ -7,6 +7,14 @@
     padding-right: 7px;
 }
 
+.log-table .filter-line-0 {
+    background: #f0fff0;
+}
+
+.log-table .filter-line-1 {
+    background: #fff0f0;
+}
+
 .log-table tr:hover {
     background: #eee;
 }

@@ -28,14 +28,18 @@ def log_view(request):
     NUM_PER_PAGE = 100
 
     filters = dict()
+    exfilters = dict()
     for name in FIELDS:
-        value = request.GET.get(name)
+        value = request.GET.get("%s0" % name)
         if value:
             filters["%s__icontains" % name] = value
+        value = request.GET.get("%s1" % name)
+        if value:
+            exfilters["%s__icontains" % name] = value
 
     num_logs_all = LogFileEntry.objects.all().count()
 
-    qset = LogFileEntry.objects.filter(**filters)
+    qset = LogFileEntry.objects.filter(**filters).exclude(**exfilters)
     qset = qset.order_by("-date")
 
     num_logs = qset.count()
@@ -48,17 +52,20 @@ def log_view(request):
 
     num_pages = num_logs // NUM_PER_PAGE
 
-    headers = []
-    for name in FIELDS:
-        value = request.GET.get(name, "")
-        headers.append({
-            "name": name,
-            "widget": """<input type="text" name="%s" value="%s" class="table-filter" 
-                                data-ac-url="%s" data-ac-field="%s">""" % (
-                name, value,
-                reverse("logview:autocomplete"), name,
-            )
-        })
+    header_lines = []
+    for line in range(2):
+        headers = []
+        for name in FIELDS:
+            value = request.GET.get("%s%s" % (name, line), "")
+            headers.append({
+                "name": name,
+                "widget": """<input type="text" name="%s%s" value="%s" class="table-filter" 
+                                    data-ac-url="%s" data-ac-field="%s">""" % (
+                    name, line, value,
+                    reverse("logview:autocomplete"), name,
+                )
+            })
+        header_lines.append([line, headers])
 
     def _url(page):
         f = filters.copy()
@@ -73,7 +80,8 @@ def log_view(request):
         "logs": qset,
         "num_logs": num_logs,
         "num_logs_percent": round(num_logs / max(1, num_logs_all) * 100, 2),
-        "headers": headers,
+        "headers": FIELDS,
+        "header_lines": header_lines,
         "pages": [("""<a href="%s">%s</a>""" % (_url(p), p)) if p!=cur_page else p
                   for p in range(num_pages)],
         "cur_page": cur_page,

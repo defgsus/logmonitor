@@ -16,15 +16,17 @@
     <table class="log-table">
         <thead>
             <tr>
-                {% for head in headers %}
-                    <td>{{ head.name }}</td>
+                {% for name in headers %}
+                    <td>{{ name }}</td>
                 {% endfor %}
             </tr>
-            <tr>
-                {% for head in headers %}
-                    <td>{{ head.widget|safe }}</td>
-                {% endfor %}
-            </tr>
+            {% for headers in header_lines %}
+                <tr class="filter-line-{{headers.0}}">
+                    {% for head in headers.1 %}
+                        <td>{{ head.widget|safe }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
         </thead>
         <tbody>
         {% for log in logs %}
