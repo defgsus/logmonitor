@@ -27,19 +27,9 @@ def log_view(request):
     FIELDS = ("file", "date", "time", "user", "task", "text")
     NUM_PER_PAGE = 1000
 
-    filters = dict()
-    exfilters = dict()
-    for name in FIELDS:
-        value = request.GET.get("%s0" % name)
-        if value:
-            filters["%s__icontains" % name] = value
-        value = request.GET.get("%s1" % name)
-        if value:
-            exfilters["%s__icontains" % name] = value
-
     num_logs_all = LogFileEntry.objects.all().count()
 
-    qset = LogFileEntry.objects.filter(**filters).exclude(**exfilters)
+    qset = complex_filter(FIELDS, LogFileEntry.objects.all(), request.GET)
     qset = qset.order_by("-date")
 
     num_logs = qset.count()
@@ -202,3 +192,30 @@ def histogram_markup(qset, filters):
 
     markup += """</div>"""
     return markup
+
+
+def complex_filter(FIELDS, qset, queries):
+
+    for name in FIELDS:
+        value = queries.get("%s0" % name)
+        if value:
+            if not "," in value:
+                qset = qset.filter(**{"%s__icontains" % name: value})
+            else:
+                or_qset = None
+                for val in value.split(","):
+                    val = val.strip()
+                    fqset = qset.filter(**{"%s__icontains" % name: val})
+                    if or_qset is None:
+                        or_qset = fqset
+                    else:
+                        or_qset |= fqset
+                qset = or_qset
+
+        value = queries.get("%s1" % name)
+        if value:
+            values = [v.strip() for v in value.split(",")]
+            for val in values:
+                qset = qset.exclude(**{"%s__icontains" % name: val})
+
+    return qset
