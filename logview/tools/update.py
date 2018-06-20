@@ -1,3 +1,4 @@
+
 from django.conf import settings
 from django.db import transaction
 
@@ -14,9 +15,9 @@ def update_log_entries(file_id):
     filename = settings.LOG_FILES[file_id]
 
     after_date = None
-    qset = LogFileEntry.objects.filter(file=file_id).order_by("-date")
+    qset = LogFileEntry.objects.filter(file=file_id).order_by("-date", "-time")
     if qset.exists():
-        after_date = qset[0].date
+        after_date = qset[0].datetime()
 
     data = load_logfiles(filename, file_id, after_date=after_date)
 
@@ -24,7 +25,8 @@ def update_log_entries(file_id):
         for e in data:
             LogFileEntry.objects.create(
                 file=file_id,
-                date=e["date"],
+                date=e["date"].date(),
+                time=e["date"].time(),
                 user=e["user"],
                 task=e["task"],
                 text=e["text"],

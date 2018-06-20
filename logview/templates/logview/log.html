@@ -6,9 +6,9 @@
 
 <hr>
 
-<div class="paginator">
-    {% for p in pages %}<div>{{p|safe}}</div>{% endfor %}
-</div>
+{{paginator|safe}}
+
+{{histogram|safe}}
 
 <form method="get">
     <input type="submit" hidden="hidden">
@@ -33,6 +33,7 @@
             <tr>
                 <td>{{log.file}}</td>
                 <td>{{log.date.isoformat}}</td>
+                <td>{{log.time.isoformat}}</td>
                 <td>{{log.user}}</td>
                 <td>{{log.task}}</td>
                 <td>{{log.text}}</td>
