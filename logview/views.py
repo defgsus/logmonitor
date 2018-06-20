@@ -49,10 +49,9 @@ def log_view(request):
     except (TypeError, ValueError):
         cur_page = 0
 
-    f = filters.copy()
-    f.update(exfilters)
-    paginator = paginator_markup(qset, f, cur_page, NUM_PER_PAGE)
-    histogram = histogram_markup(qset, f)
+    queries = {key: request.GET[key] for key in request.GET if request.GET[key]}
+    paginator = paginator_markup(qset, queries, cur_page, NUM_PER_PAGE)
+    histogram = histogram_markup(qset, queries)
 
     qset = qset[cur_page*NUM_PER_PAGE:(cur_page+1)*NUM_PER_PAGE]
 
@@ -113,7 +112,7 @@ def paginator_markup(qset, filters, cur_page, NUM_PER_PAGE):
         f = filters.copy()
         f["p"] = page
         url = urlencode(f)
-        if not filters:
+        if f:
             url = "?" + url
         return url
 
@@ -135,7 +134,7 @@ def paginator_markup(qset, filters, cur_page, NUM_PER_PAGE):
             if h1.date() == h2.date():
                 tip = "%s, %s - %s" % (h1.date(), h1.time(), h2.time())
             else:
-                tip = "%s - %s" % (h1, h2)
+                tip = "%s - %s" % (h1.date(), h2.date())
         date_histogram[key] = {
             "page": key,
             "tip": tip,
@@ -158,7 +157,6 @@ def histogram_markup(qset, filters):
                  for v in qset.order_by("date").values_list("date", "time")]
 
     min_ord, max_ord = log_dates[0].toordinal(), log_dates[-1].toordinal()
-    print(max_ord-min_ord)
     num_per_bin = max(1, (max_ord - min_ord) // 100)
 
     date_histogram = {i//num_per_bin: []
