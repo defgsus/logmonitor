@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from jsonfield.fields import JSONField
 
 
 class HoneypotLog(models.Model):
