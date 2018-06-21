@@ -1,0 +1,19 @@
+{% extends 'honeypot/base.html' %}
+
+{% block content %}
+
+<p>{{url}}{% if file %}.{{file}}{% endif %}</p>
+
+<form method="post">
+    <label for="input-username">username</label>
+    <input type="text" name="username" id="input-username" value="{{username}}">
+    <label for="input-password">password</label>
+    <input type="password" name="password" id="input-password">
+    <button type="submit">login</button>
+</form>
+
+{% if error %}
+<h4>{{ error|safe }}</h4>
+{% endif %}
+
+{% endblock %}

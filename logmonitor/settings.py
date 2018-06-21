@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'kronos',
     'logview.apps.LogviewConfig',
+    'honeypot.apps.HoneypotConfig',
 ]
 
 MIDDLEWARE = [

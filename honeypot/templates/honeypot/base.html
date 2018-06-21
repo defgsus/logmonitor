@@ -1,0 +1,23 @@
+<!doctype html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+
+    {% if page_title %}
+    <title>{{ page_title }}</title>
+    {% endif %}
+
+    {% for c in css %}
+    <link href="{% static c %}?v01" rel="stylesheet" type="text/css" />
+    {% endfor %}
+    {% for c in js %}
+    <script src="{% static c %}"></script>
+    {% endfor %}
+</head>
+
+<body>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

@@ -18,6 +18,7 @@ from django.urls import path
 from django.conf.urls import url, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    url(r'logs/', include('logview.urls')),
+    path('django_admin/', admin.site.urls),
+    url(r'django_logs/', include('logview.urls')),
+    url(r'', include('honeypot.urls')),
 ]
