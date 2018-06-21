@@ -13,6 +13,9 @@ class LogFileEntry(models.Model):
     task = models.CharField(verbose_name=_("task"), max_length=64, db_index=True)
     text = models.TextField(verbose_name=_("text"), db_index=True)
 
+    source_ip = models.GenericIPAddressField(verbose_name=_("source ip"),
+                                             null=True, default=None, db_index=True)
+
     def datetime(self):
         d = self.date
         t = self.time

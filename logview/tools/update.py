@@ -30,4 +30,5 @@ def update_log_entries(file_id):
                 user=e["user"],
                 task=e["task"],
                 text=e["text"],
+                source_ip=e["source_ip"],
             )

@@ -24,7 +24,7 @@ def index_view(request):
 @login_required
 def log_view(request):
 
-    FIELDS = ("file", "date", "time", "user", "task", "text")
+    FIELDS = ("file", "date", "time", "user", "source_ip", "task", "text")
     NUM_PER_PAGE = 1000
 
     num_logs_all = LogFileEntry.objects.all().count()

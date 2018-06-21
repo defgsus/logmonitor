@@ -59,13 +59,30 @@ def _load_logfile(fp, file_id, year):
     lines = lines.decode("utf-8").split("\n")
 
     num_no_date = 0
+    num_errors = 0
 
     for line in lines:
         #print(line)
         if not line:
             continue
 
-        if file_id == "dpkg":
+        source_ip = None
+
+        if "nginx" in file_id:
+            sline = line.split()
+            if len(sline) < 5:
+                num_errors += 1
+                continue
+            source_ip = sline[0]
+            user = sline[1]
+            dt = sline[3][1:]  # TODO: ignores timezone
+            dt = datetime.datetime.strptime(dt, "%d/%b/%Y:%H:%M:%S")
+            line = line[len(" ".join(sline[:5])):]
+            line = line[line.find('"')+1:]
+            task = line[0:line.find('"')]
+            text = line[line.find('"')+1:]
+
+        elif file_id == "dpkg":
             user = ""
             dt = datetime.datetime.strptime(line[:19], "%Y-%m-%d %H:%M:%S")
             line = line[20:].strip()
@@ -110,12 +127,15 @@ def _load_logfile(fp, file_id, year):
             "date": dt,
             "user": user,
             "task": task,
-            "text": text
+            "text": text,
+            "source_ip": source_ip,
         })
         #print(dt, user, task, text)
 
     if num_no_date:
         print("parse-error", "%s without date" % num_no_date)
+    if num_errors:
+        print("parse-error", "%s general parse errors" % num_errors)
     return ret
 
 
