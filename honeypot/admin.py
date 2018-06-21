@@ -1,3 +1,14 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import HoneypotLog
+
+
+class HoneypotLogAdmin(admin.ModelAdmin):
+    exclude=[]
+    model=HoneypotLog
+    list_display = (
+        "__str__", "time", "date", "source_ip", "url", "username", "password", "params",
+    )
+
+
+admin.site.register(HoneypotLog, HoneypotLogAdmin)
