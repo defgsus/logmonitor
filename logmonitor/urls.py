@@ -19,5 +19,5 @@ from django.conf.urls import url, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^logs/', include('logview.urls')),
+    url(r'logs/', include('logview.urls')),
 ]
