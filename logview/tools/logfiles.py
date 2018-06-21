@@ -69,18 +69,25 @@ def _load_logfile(fp, file_id, year):
         source_ip = None
 
         if "nginx" in file_id:
-            sline = line.split()
-            if len(sline) < 5:
-                num_errors += 1
-                continue
-            source_ip = sline[0]
-            user = sline[1]
-            dt = sline[3][1:]  # TODO: ignores timezone
-            dt = datetime.datetime.strptime(dt, "%d/%b/%Y:%H:%M:%S")
-            line = line[len(" ".join(sline[:5])):]
-            line = line[line.find('"')+1:]
-            task = line[0:line.find('"')]
-            text = line[line.find('"')+1:]
+            if "error" in file_id:
+                dt = datetime.datetime.strptime(line[:19], "%Y/%m/%d %H:%M:%S")
+                line = line[20:].strip()
+                user = ""
+                task = line[1:line.find("]")]
+                text = line[line.find("]")+1:].strip()
+            else:
+                sline = line.split()
+                if len(sline) < 5:
+                    num_errors += 1
+                    continue
+                source_ip = sline[0]
+                user = sline[1]
+                dt = sline[3][1:]  # TODO: ignores timezone
+                dt = datetime.datetime.strptime(dt, "%d/%b/%Y:%H:%M:%S")
+                line = line[len(" ".join(sline[:5])):]
+                line = line[line.find('"')+1:]
+                task = line[0:line.find('"')]
+                text = line[line.find('"')+1:]
 
         elif file_id == "dpkg":
             user = ""
