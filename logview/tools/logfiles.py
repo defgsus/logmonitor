@@ -38,10 +38,10 @@ def load_logfile(filename, file_id):
         dt = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         if filename.endswith(".gz"):
             with gzip.open(filename, "rb") as fp:
-                return _load_logfile(fp, file_id, dt.year)
+                return _load_logfile(fp, file_id, filename, dt.year)
         else:
             with open(filename, "rb") as fp:
-                return _load_logfile(fp, file_id, dt.year)
+                return _load_logfile(fp, file_id, filename, dt.year)
     except PermissionError as e:
         print("permission-error", filename, e)
         return []
@@ -53,7 +53,7 @@ def load_logfile(filename, file_id):
         raise e
 
 
-def _load_logfile(fp, file_id, year):
+def _load_logfile(fp, file_id, filename, year):
     ret = []
     lines = fp.read()
     lines = lines.decode("utf-8").split("\n")
@@ -69,7 +69,7 @@ def _load_logfile(fp, file_id, year):
         source_ip = None
 
         if "nginx" in file_id:
-            if "error" in file_id:
+            if "error" in file_id or "-error" in filename:
                 dt = datetime.datetime.strptime(line[:19], "%Y/%m/%d %H:%M:%S")
                 line = line[20:].strip()
                 user = ""
