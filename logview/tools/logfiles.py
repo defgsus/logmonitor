@@ -27,8 +27,6 @@ def load_logfiles(filename, file_id, after_date=None):
             for d in data:
                 if d["date"] > after_date:
                     all_data.append(d)
-                else:
-                    return all_data
     return all_data
 
 
