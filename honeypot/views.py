@@ -9,7 +9,7 @@ from .models import HoneypotLog
 
 @csrf_exempt
 def index_view(request, url):
-    return index_view2(url, "")
+    return index_view2(request, url, "")
 
 
 @csrf_exempt
@@ -36,8 +36,8 @@ def index_view2(request, url, file):
             time=now.time(),
             source_ip=ip,
             url=("%s.%s" % (url, file)) if file else url,
-            username=username,
-            password=password,
+            username=username or "",
+            password=password or "",
             params=parameters,
         )
 

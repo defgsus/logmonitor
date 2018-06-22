@@ -3,13 +3,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.http import JsonResponse
 
 from .models import *
 
 
-@login_required
+@permission_required("logview:add_logentry", raise_exception=True)
 def index_view(request):
 
     ctx = {
@@ -21,7 +21,7 @@ def index_view(request):
     return render(request, "logview/index.html", ctx)
 
 
-@login_required
+@permission_required("logview:add_logentry", raise_exception=True)
 def log_view(request):
 
     FIELDS = ("file", "date", "time", "user", "source_ip", "task", "text")
@@ -78,7 +78,7 @@ def log_view(request):
     return render(request, "logview/log.html", ctx)
 
 
-@login_required
+@permission_required("logview:add_logentry", raise_exception=True)
 def autocomplete(request):
     field = request.GET.get("n")
     query = request.GET.get("q")
