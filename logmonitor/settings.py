@@ -137,6 +137,7 @@ LOG_FILES = {
 
     "nginx/access": "/var/log/nginx/access",
     "nginx/error": "/var/log/nginx/error",
+    "nginx/logmon": "/var/log/nginx/logmonitor",
 }
 
 
