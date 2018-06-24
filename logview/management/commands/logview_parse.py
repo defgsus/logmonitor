@@ -1,0 +1,18 @@
+# encoding=utf-8
+import datetime
+
+from django.core.management.base import BaseCommand, CommandError
+
+
+class Command(BaseCommand):
+    help = 'Revisit all previously saved log entries and parse ip'
+
+    def handle(self, *args, **options):
+        starttime = datetime.datetime.now()
+
+        from logview.tools.update import parse_ips
+        parse_ips()
+
+        endtime = datetime.datetime.now()
+
+        print("TOOK %s" % (endtime - starttime))

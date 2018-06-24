@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import transaction
 
 from logview.models import LogFileEntry
-from .logfiles import load_logfiles
+from .logfiles import load_logfiles, parse_entry
 
 
 def update_all_log_entries():
@@ -32,3 +32,17 @@ def update_log_entries(file_id):
                 text=e["text"],
                 source_ip=e["source_ip"],
             )
+
+
+def parse_ips():
+    with transaction.atomic():
+        for log in LogFileEntry.objects.filter(source_ip=None):
+            fields = {
+                "user": log.user,
+                "task": log.task,
+                "text": log.text,
+            }
+            fields = parse_entry(fields)
+            if fields.get("source_ip"):
+                log.source_ip = fields["source_ip"]
+                log.save()

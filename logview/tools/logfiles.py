@@ -1,4 +1,5 @@
 import os
+import re
 import gzip
 import datetime
 
@@ -128,13 +129,13 @@ def _load_logfile(fp, file_id, filename, year):
                 task = sline[0]
                 text = " ".join(sline[1:])
 
-        ret.append({
+        ret.append(parse_entry({
             "date": dt,
             "user": user,
             "task": task,
             "text": text,
             "source_ip": source_ip,
-        })
+        }))
         #print(dt, user, task, text)
 
     if num_no_date:
@@ -144,10 +145,33 @@ def _load_logfile(fp, file_id, filename, year):
     return ret
 
 
+def parse_entry(fields):
+    text = fields.get("text", "")
+
+    source_ip = None
+    for ip in re.findall(r"SRC=(\d+\.\d+\.\d+\.\d+)", text):
+        source_ip = ip
+
+    for ip in re.findall(r"client: (\d+\.\d+\.\d+\.\d+)", text):
+        source_ip = ip
+
+    if source_ip:
+        fields["source_ip"] = source_ip
+
+    return fields
+
+
 if __name__ == "__main__":
 
-    after_date = datetime.datetime(2018, 6, 18, 10, 11, 58)
+    if 0:
+        after_date = datetime.datetime(2018, 6, 18, 10, 11, 58)
+        data = load_logfiles("/var/log/syslog", "syslog", after_date=after_date)
+        print(data)
+        print(len(data))
 
-    data = load_logfiles("/var/log/syslog", after_date=after_date)
-    print(data)
-    print(len(data))
+    if 1:
+        fields = {
+            #"text": "[789990.372763] [UFW BLOCK] IN=enp3s0 OUT= MAC=c8:60:00:bc:3f:79:40:71:83:a2:fc:ae:08:00 SRC=5.188.10.103 DST=5.9.84.201 LEN=40 TOS=0x00 PREC=0x00 TTL=249 ID=58572 PROTO=TCP SPT=40731 DPT=2770 WINDOW=1024 RES=0x00 SYN URGP=0",
+            "text": '2417#2417: *13839 open() "/srv/www/logmonitor/webrobots.txt" failed (2: No such file or directory), client: 66.249.66.218, server: _, request: "GET /robots.txt HTTP/1.1", host: "xn--80adhcckn5dbfh2ira.xn--p1ai"',
+        }
+        print(parse_entry(fields))
