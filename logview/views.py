@@ -43,7 +43,8 @@ def log_view(request):
     paginator = paginator_markup(qset, queries, cur_page, NUM_PER_PAGE)
     histogram = histogram_markup(qset, queries)
 
-    qset = qset[cur_page*NUM_PER_PAGE:(cur_page+1)*NUM_PER_PAGE]
+    if qset.exists():
+        qset = qset[cur_page*NUM_PER_PAGE:(cur_page+1)*NUM_PER_PAGE]
 
     num_pages = num_logs // NUM_PER_PAGE
 
@@ -143,6 +144,9 @@ def paginator_markup(qset, filters, cur_page, NUM_PER_PAGE):
 
 
 def histogram_markup(qset, filters):
+    if not qset.exists():
+        return ""
+
     log_dates = [datetime.datetime(v[0].year, v[0].month, v[0].day, v[1].hour, v[1].minute, v[1].second)
                  for v in qset.order_by("date").values_list("date", "time")]
 
