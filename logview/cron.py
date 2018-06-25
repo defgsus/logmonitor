@@ -9,6 +9,6 @@ def logview_update():
     """
     Read logs into database
     """
-    from logview.tools.update import update_all_log_entries
-    update_all_log_entries()
+    from logview.tools.update import update_task
+    update_task()
 

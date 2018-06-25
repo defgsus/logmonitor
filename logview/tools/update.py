@@ -5,6 +5,10 @@ from django.db import transaction
 from logview.models import LogFileEntry, Logger
 from .logfiles import load_logfiles, parse_entry
 
+def update_task():
+    update_all_log_entries()
+    get_nslookups()
+
 
 def update_all_log_entries():
     for file_id in settings.LOG_FILES:
