@@ -48,11 +48,27 @@ def parse_ips():
                 log.save()
 
 
-def get_nslookups():
+def get_nslookups(parallel=True):
     from .nslookup import get_nslookup, get_whois
+    from ..models import NslookupRequest, WhoisRequest
+
     ips = LogFileEntry.objects.all().exclude(source_ip=None).values_list("source_ip").distinct()
     ips = set(v[0] for v in ips)
 
-    for ip in ips:
-        get_nslookup(ip)
-        get_whois(ip)
+    def _get(ip):
+        if not NslookupRequest.objects.filter(ip=ip).exists():
+            print("nslookup %s" % ip)
+            get_nslookup(ip)
+        if not WhoisRequest.objects.filter(ip=ip).exists():
+            print("whois %s" % ip)
+            get_whois(ip)
+
+    if not parallel:
+        for ip in ips:
+            _get(ip)
+    else:
+        from multiprocessing.pool import ThreadPool
+
+        pool = ThreadPool(32)
+        pool.map(_get, ips)
+
