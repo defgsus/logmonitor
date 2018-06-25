@@ -10,8 +10,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         starttime = datetime.datetime.now()
 
-        from logview.tools.update import update_all_log_entries
+        from logview.tools.update import update_all_log_entries, get_nslookups
         update_all_log_entries()
+        get_nslookups()
 
         endtime = datetime.datetime.now()
 

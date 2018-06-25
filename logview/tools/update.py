@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.db import transaction
 
-from logview.models import LogFileEntry
+from logview.models import LogFileEntry, Logger
 from .logfiles import load_logfiles, parse_entry
 
 
@@ -46,3 +46,13 @@ def parse_ips():
             if fields.get("source_ip"):
                 log.source_ip = fields["source_ip"]
                 log.save()
+
+
+def get_nslookups():
+    from .nslookup import get_nslookup, get_whois
+    ips = LogFileEntry.objects.all().exclude(source_ip=None).values_list("source_ip").distinct()
+    ips = set(v[0] for v in ips)
+
+    for ip in ips:
+        get_nslookup(ip)
+        get_whois(ip)
