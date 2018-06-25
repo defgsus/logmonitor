@@ -26,6 +26,7 @@ class LogFileEntry(models.Model):
     def source_ip_decorator(self):
         from ..tools.nsmapping import NsMapping
         mapping = NsMapping()
+        mapping.do_query = False
         return mark_safe(mapping.ip_decorator(self.source_ip))
     source_ip_decorator.short_description = _("source ip")
     source_ip_decorator.admin_order_field = "source_ip"

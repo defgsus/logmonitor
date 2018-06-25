@@ -7,17 +7,18 @@ from collections import OrderedDict
 from ..models import NslookupRequest, WhoisRequest, DummyLogger
 
 
-def get_nslookup_raw(ip, log=None, do_read_cache=True, do_write_cache=True):
+def get_nslookup_raw(ip, log=None, do_read_cache=True, do_write_cache=True, do_query=True):
     return _lookup_impl(
         NslookupRequest,
         ["nslookup", "%s" % ip],
         ip,
-        log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache
+        log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache, do_query=do_query
     )
 
 
-def get_nslookup(ip, log=None, do_read_cache=True, do_write_cache=True):
-    ret = get_nslookup_raw(ip, log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache)
+def get_nslookup(ip, log=None, do_read_cache=True, do_write_cache=True, do_query=True):
+    ret = get_nslookup_raw(ip, log=log,
+                           do_read_cache=do_read_cache, do_write_cache=do_write_cache, do_query=do_query)
     if ret is None:
         return ret
     if "\tname =" in ret:
@@ -25,17 +26,18 @@ def get_nslookup(ip, log=None, do_read_cache=True, do_write_cache=True):
     return ret
 
 
-def get_whois_raw(ip, log=None, do_read_cache=True, do_write_cache=True):
+def get_whois_raw(ip, log=None, do_read_cache=True, do_write_cache=True, do_query=True):
     return _lookup_impl(
         WhoisRequest,
         ["whois", "%s" % ip],
         ip,
-        log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache
+        log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache, do_query=do_query
     )
 
 
-def get_whois(ip, log=None, do_read_cache=True, do_write_cache=True):
-    text = get_whois_raw(ip, log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache)
+def get_whois(ip, log=None, do_read_cache=True, do_write_cache=True, do_query=True):
+    text = get_whois_raw(ip, log=log,
+                         do_read_cache=do_read_cache, do_write_cache=do_write_cache, do_query=do_query)
     if text:
         dic = OrderedDict()
         for token in ("Organization:", "descr:", "netname:", "address:", "owner:"):
@@ -46,16 +48,19 @@ def get_whois(ip, log=None, do_read_cache=True, do_write_cache=True):
     return text
 
 
-def _lookup_impl(Model, args, ip, log=None, do_read_cache=True, do_write_cache=True):
+def _lookup_impl(Model, args, ip, log=None, do_read_cache=True, do_write_cache=True, do_query=True):
     if do_read_cache:
         qset = Model.objects.filter(ip=ip)
         if qset.exists():
             return qset.order_by("-date")[0].response
 
+    if not do_query:
+        return None
+
     error = None
     try:
         res = subprocess.check_output(args, stderr=subprocess.STDOUT)
-        res = res.strip().decode("utf-8")
+        res = res.decode("utf-8").strip()
     except subprocess.CalledProcessError as e:
         error = e
         res = None
