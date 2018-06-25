@@ -2,6 +2,7 @@
 import os
 import datetime
 import subprocess
+from collections import OrderedDict
 
 from ..models import NslookupRequest, WhoisRequest, DummyLogger
 
@@ -36,9 +37,12 @@ def get_whois_raw(ip, log=None, do_read_cache=True, do_write_cache=True):
 def get_whois(ip, log=None, do_read_cache=True, do_write_cache=True):
     text = get_whois_raw(ip, log=log, do_read_cache=do_read_cache, do_write_cache=do_write_cache)
     if text:
+        dic = OrderedDict()
         for token in ("Organization:", "descr:", "netname:", "address:", "owner:"):
             if token in text:
-                return text.split(token)[1].split("\n")[0].strip()
+                dic[token] = text.split(token)[1].split("\n")[0].strip()
+        if dic:
+            return "/".join(dic.values())
     return text
 
 

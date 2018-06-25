@@ -7,7 +7,7 @@ class LogFileEntryAdmin(admin.ModelAdmin):
     exclude=[]
     model=LogFileEntry
     list_display = (
-        "__str__", "time", "date", "source_ip", "user", "task",
+        "__str__", "time", "date", "source_ip_decorator", "user", "task",
     )
 
 admin.site.register(LogFileEntry, LogFileEntryAdmin)

@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html, mark_safe
 
 
 class LogFileEntry(models.Model):
@@ -22,3 +23,9 @@ class LogFileEntry(models.Model):
         return datetime.datetime(d.year, d.month, d.day,
                                  t.hour, t.minute, t.second)
 
+    def source_ip_decorator(self):
+        from ..tools.nsmapping import NsMapping
+        mapping = NsMapping()
+        return mark_safe(mapping.ip_decorator(self.source_ip))
+    source_ip_decorator.short_description = _("source ip")
+    source_ip_decorator.admin_order_field = "source_ip"

@@ -7,7 +7,7 @@ class HoneypotLogAdmin(admin.ModelAdmin):
     exclude=[]
     model=HoneypotLog
     list_display = (
-        "__str__", "time", "date", "source_ip", "url", "username", "password", "params",
+        "__str__", "time", "date", "source_ip_decorator", "url", "username", "password", "params",
     )
 
 
