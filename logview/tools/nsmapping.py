@@ -24,10 +24,10 @@ class NsMapping(object):
         ret = "%s" % ip
         url = self.ip_to_url(ip)
         if url:
-            ret += " (<b>%s</b>)" % url
+            ret += "<br>(<b>%s</b>)" % url
 
         owner = self.ip_to_owner(ip)
         if owner:
-            ret += " (%s)" % owner
+            ret += "<br>(%s)" % owner
 
         return ret

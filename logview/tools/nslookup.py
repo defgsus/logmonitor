@@ -42,7 +42,7 @@ def get_whois(ip, log=None, do_read_cache=True, do_write_cache=True):
             if token in text:
                 dic[token] = text.split(token)[1].split("\n")[0].strip()
         if dic:
-            return "/".join(dic.values())
+            return " / ".join(dic.values())
     return text
 
 
