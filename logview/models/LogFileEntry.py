@@ -21,3 +21,4 @@ class LogFileEntry(models.Model):
         t = self.time
         return datetime.datetime(d.year, d.month, d.day,
                                  t.hour, t.minute, t.second)
+
