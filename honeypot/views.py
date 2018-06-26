@@ -1,19 +1,36 @@
+import os
+
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.http import HttpResponse
+from django.conf import settings
 
 from ipware import get_client_ip
 
 from .models import HoneypotLog
 
 
+BOB = dict()
+
+
+def get_bob(ext):
+    global BOB
+    if ext not in BOB:
+        with open(
+                os.path.join(settings.BASE_DIR, "honeypot", "templates", "honeypot", "bob.%s" % ext),
+                "rb") as fp:
+           BOB[ext] = fp.read()
+    return BOB[ext]
+
+
+#@csrf_exempt
+#def index_view(request, url):
+#    return index_view2(request, url, "")
+
+
 @csrf_exempt
 def index_view(request, url):
-    return index_view2(request, url, "")
-
-
-@csrf_exempt
-def index_view2(request, url, file):
 
     now = timezone.now()
 
@@ -35,15 +52,21 @@ def index_view2(request, url, file):
             date=now.date(),
             time=now.time(),
             source_ip=ip,
-            url=("%s.%s" % (url, file)) if file else url,
+            url=url,
             username=username or "",
             password=password or "",
             params=parameters,
         )
 
+    if url.lower().endswith(".jpg") or url.lower().endswith(".jpeg"):
+        return HttpResponse(get_bob("jpg"), content_type="image/jpeg")
+
+    if url.lower().endswith(".png"):
+        return HttpResponse(get_bob("png"), content_type="image/png")
+
     ctx = {
         "url": url,
-        "file": file,
+        #"file": file,
         "username": username or "",
     }
 
